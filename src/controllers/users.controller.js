@@ -1,25 +1,14 @@
-// import { UsersServies } from '../services/users.servies';
+import { UsersService } from '../services/users.servies.js';
 
 export class UsersController {
-  // usersServies = new UsersServies();
+  usersService = new UsersService();
   getUsers = async (req, res, next) => {
     try {
-      const userId = res.locals.user;
-      const myInfo = await this.usersServies.findFirstUsers({
-        where: { Id: +userId },
-        select: {
-          email: true,
-          name: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
+      const { userId } = res.locals.user;
 
-      return res.status(200).json({
-        success: true,
-        message: '내 정보 조회에 성공했습니다.',
-        data: myInfo,
-      });
+      const myInfo = await this.usersService.getUsers(userId);
+
+      return res.status(200).json(myInfo);
     } catch (error) {
       console.error(error);
       return res.status(500).json({
