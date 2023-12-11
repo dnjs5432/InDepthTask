@@ -1,18 +1,25 @@
 import bcrypt from 'bcrypt';
 import { prisma } from '../utils/prisma/index.js';
+import { PASSWORD_HASH_SALT_ROUNDS } from '../../constants/security.costant.js';
 
 export class AuthRepositories {
-  signIn = async (email, password) => {
-    const user = await prisma.Users.findUnique({ where: { email } });
+  findUserByEmail = async (email) => {
+    const existUser = await prisma.users.findFirst({ where: { email } });
 
-    return user;
+    return existUser;
   };
+  signIn = async (email, password) => {
+    const signInUser = await prisma.users.findFirst({ where: { email } });
+
+    return signInUser;
+  };
+
   createUser = async (email, password, name) => {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const createdUser = await prisma.Users.create({
+    console.log('password', password);
+    const createdUser = await prisma.users.create({
       data: {
         email,
-        password: hashedPassword,
+        password,
         name,
       },
     });

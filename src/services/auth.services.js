@@ -1,22 +1,54 @@
 import bcrypt from 'bcrypt';
-import { AuthRepositories } from '../../repositories/auth.repositories.js';
+import { AuthRepositories } from '../repositories/auth.repositories.js';
+import {
+  PASSWORD_HASH_SALT_ROUNDS,
+  JWT_ACCESS_TOKEN_SECRET,
+  JWT_ACCESS_TOKEN_EXPIRES_IN,
+} from '../../constants/security.costant.js';
+
+import jwt from 'jsonwebtoken';
 
 export class AuthService {
   authRepositories = new AuthRepositories();
 
-  SingIn = async (email, password) => {
-    const user = await prisma.Users.findUnique({ where: email });
-
-    if (!user) {
-      return null;
-    }
-    const passwordMatch = await bcrypt.compare(password, user.password);
-
-    if (!passwordMatch) {
-      return null;
-    }
+  findUserByEmail = async (email) => {
+    const user = await this.authRepositories.findUserByEmail(email);
     return user;
   };
+
+  signIn = async (email, password) => {
+    if (!email || !password) {
+      return {
+        success: false,
+        message: '이메일과 비밀번호를 입력해주세요.',
+      };
+    }
+
+    const user = await this.authRepositories.findUserByEmail(email);
+
+    const hashedPassword = user?.password ?? '';
+    const isPasswordMatched = bcrypt.compareSync(password, hashedPassword);
+
+    console.log('password', password);
+    console.log('hashedPassword', hashedPassword);
+
+    const isCorrectUser = user && isPasswordMatched;
+    console.log('user', user);
+    console.log('isPasswordMatched', isPasswordMatched);
+    if (!isCorrectUser) {
+      return {
+        success: false,
+        message: '일치하는 인증 정보가 없습니다.',
+      };
+    }
+    const accessToken = jwt.sign({ userId: user.id }, JWT_ACCESS_TOKEN_SECRET, {
+      expiresIn: JWT_ACCESS_TOKEN_EXPIRES_IN,
+    });
+    return {
+      accessToken,
+    };
+  };
+
   createUser = async (email, password, passwordConfirm, name) => {
     if (!email || !password || !passwordConfirm || !name) {
       return {
@@ -48,7 +80,7 @@ export class AuthService {
       };
     }
 
-    const existedUser = await Users.findUnique({ where: { email } });
+    const existedUser = await this.authRepositories.findUserByEmail(email);
 
     if (existedUser) {
       return {
@@ -59,12 +91,13 @@ export class AuthService {
 
     const hashedPassword = bcrypt.hashSync(password, PASSWORD_HASH_SALT_ROUNDS);
 
-    const newUser = await this.authRepositories.createUser({
+    const newUser = await this.authRepositories.createUser(
       email,
-      password: hashedPassword,
+      hashedPassword,
       name,
-    });
-
+    );
     delete newUser.password;
+    console.log('newUser', newUser);
+    return newUser;
   };
 }

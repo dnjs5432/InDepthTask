@@ -7,46 +7,17 @@ export class AuthController {
     try {
       const { email, password } = req.body;
 
-      if (!email) {
-        return res.status(400).json({
-          success: false,
-          message: '이메일 입력이 필요합니다.',
+      const signInUser = await this.authService.signIn(email, password);
+
+      if (signInUser.accessToken) {
+        return res.status(200).json({
+          success: true,
+          message: '로그인에 성공했습니다.',
+          data: signInUser.accessToken,
         });
+      } else if (!signInUser.success) {
+        return res.status(400).json(signInUser);
       }
-
-      if (!password) {
-        return res.status(400).json({
-          success: false,
-          message: '비밀번호 입력이 필요합니다.',
-        });
-      }
-
-      const user = (await Users.findUnique({ where: { email } }))?.toJSON();
-      const hashedPassword = user?.password ?? '';
-      const isPasswordMatched = bcrypt.compareSync(password, hashedPassword);
-
-      const isCorrectUser = user && isPasswordMatched;
-
-      if (!isCorrectUser) {
-        return res.status(401).json({
-          success: false,
-          message: '일치하는 인증 정보가 없습니다.',
-        });
-      }
-
-      const accessToken = jwt.sign(
-        { userId: user.id },
-        JWT_ACCESS_TOKEN_SECRET,
-        {
-          expiresIn: JWT_ACCESS_TOKEN_EXPIRES_IN,
-        },
-      );
-
-      return res.status(200).json({
-        success: true,
-        message: '로그인에 성공했습니다.',
-        data: { accessToken },
-      });
     } catch (error) {
       console.error(error);
       return res.status(500).json({
@@ -64,7 +35,7 @@ export class AuthController {
       if (!email || !password || !passwordConfirm || !name) {
         return res.status(400).json({
           success: false,
-          message: '',
+          message: '빈칸을 모두 채워주세요.',
         });
       }
 
@@ -74,12 +45,15 @@ export class AuthController {
         passwordConfirm,
         name,
       );
-
-      return res.status(201).json({
-        success: true,
-        message: '회원가입에 성공했습니다.',
-        data: newUser,
-      });
+      if (newUser.id) {
+        return res.status(201).json({
+          success: true,
+          message: '회원가입에 성공했습니다.',
+          data: newUser,
+        });
+      } else if (!newUser.success) {
+        return res.status(400).json(newUser);
+      }
     } catch (err) {
       next(err);
     }
