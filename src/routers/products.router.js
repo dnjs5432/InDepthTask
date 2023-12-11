@@ -9,6 +9,6 @@ router.post('/', needSignin, productController.createProduct);
 router.get('/', productController.getProduct);
 router.get('/:productId', productController.getProductDetails);
 router.put('/:productId', needSignin, productController.editProduct);
-// router.delete('/:productId', productController.deleteProduct);
+router.delete('/:productId', needSignin, productController.deleteProduct);
 
 export default router;

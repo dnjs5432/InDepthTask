@@ -38,7 +38,6 @@ export class ProductsRepositories {
   };
 
   editProduct = async (productId, title, description, status, userId) => {
-    console.log('뭐', userId);
     const product = await prisma.products.update({
       where: { productId: +productId },
       data: {
@@ -48,7 +47,13 @@ export class ProductsRepositories {
         UserId: userId,
       },
     });
-    console.log('머있니', product);
     return product;
+  };
+
+  deleteProduct = async (productId) => {
+    const deletedProduct = await prisma.products.delete({
+      where: { productId: +productId },
+    });
+    return deletedProduct;
   };
 }

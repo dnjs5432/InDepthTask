@@ -90,4 +90,37 @@ export class ProductsService {
       data: product,
     };
   };
+
+  deleteProduct = async (productId, userId) => {
+    const existProduct = await this.productsRepositories.getProductDetails(
+      productId,
+    );
+
+    if (!existProduct) {
+      return {
+        success: false,
+        message: '상품이 존재하지 않습니다.',
+      };
+    }
+
+    const deletedProduct = await this.productsRepositories.deleteProduct(
+      productId,
+      userId,
+    );
+
+    const isProductOwner = deletedProduct.UserId === userId;
+
+    if (!isProductOwner) {
+      return res.status(403).json({
+        success: false,
+        message: '상품 삭제 권한이 없습니다.',
+      });
+    }
+
+    return {
+      success: true,
+      message: '상품 삭제가 완료 되었습니다.',
+      data: deletedProduct,
+    };
+  };
 }

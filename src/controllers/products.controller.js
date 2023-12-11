@@ -106,4 +106,25 @@ export class ProductsController {
       next(err);
     }
   };
+
+  //상품삭제
+  deleteProduct = async (req, res, next) => {
+    try {
+      const { productId } = req.params;
+      const { userId } = res.locals.user;
+
+      const deletedProduct = await this.productsService.deleteProduct(
+        productId,
+        userId,
+      );
+
+      if (!deletedProduct.success) {
+        return res.status(404).json(deletedProduct);
+      }
+
+      return res.status(200).json(deletedProduct);
+    } catch (err) {
+      next(err);
+    }
+  };
 }
