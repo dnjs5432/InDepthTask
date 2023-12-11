@@ -35,7 +35,9 @@ export const needSignin = async (req, res, next) => {
     const { userId } = decodedPayload;
 
     // 일치 하는 userId가 없는 경우
-    const user = await prisma.users.findFirst(userId);
+    const user = await prisma.users.findFirst({
+      where: userId,
+    });
 
     if (!user) {
       return res.status(400).json({

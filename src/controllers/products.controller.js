@@ -78,4 +78,32 @@ export class ProductsController {
       next(err);
     }
   };
+
+  // 상품수정
+  editProduct = async (req, res, next) => {
+    // console.log('요', res.locals.user);
+    try {
+      const { productId } = req.params;
+      const { title, description, status } = req.body;
+      const { userId, name: userName } = res.locals.user;
+
+      const editproduct = await this.productsService.editProduct(
+        productId,
+        title,
+        description,
+        status,
+        userId,
+        userName,
+      );
+      if (!editproduct.success) {
+        return res.status(404).json(editproduct);
+      }
+      return res.status(200).json({
+        message: '상품 수정을 성공했습니다.',
+        data: editproduct.data,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
 }

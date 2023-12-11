@@ -36,4 +36,19 @@ export class ProductsRepositories {
     });
     return detailsProduct;
   };
+
+  editProduct = async (productId, title, description, status, userId) => {
+    console.log('뭐', userId);
+    const product = await prisma.products.update({
+      where: { productId: +productId },
+      data: {
+        title: title,
+        description: description,
+        status: status,
+        UserId: userId,
+      },
+    });
+    console.log('머있니', product);
+    return product;
+  };
 }
