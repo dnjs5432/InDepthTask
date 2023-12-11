@@ -29,4 +29,11 @@ export class ProductsRepositories {
     });
     return getproduct;
   };
+
+  getProductDetails = async (productId) => {
+    const detailsProduct = await prisma.products.findFirst({
+      where: { productId: +productId },
+    });
+    return detailsProduct;
+  };
 }

@@ -54,22 +54,28 @@ export class ProductsController {
           message: '상품 목록 조회에 성공했습니다.',
           data: products,
         });
-      } else if (!products.success) {
-        return res.status(400).json(products);
       }
     } catch (err) {
       next(err);
     }
   };
 
-  //상세조회
-  //   getProductDetails = async (req, res, next) => {
-  //     try {
-  //       const { productId } = req.params;
+  // 상세조회
+  getProductDetails = async (req, res, next) => {
+    try {
+      const { productId } = req.params;
 
-  //       const proudct = await this.productsService.getProductDetails(productId);
-  //     } catch (err) {
-  //       next(err);
-  //     }
-  //   };
+      const product = await this.productsService.getProductDetails(productId);
+
+      if (!product.success) {
+        return res.status(404).json(product);
+      }
+      return res.status(200).json({
+        message: '상품 조회에 성공했습니다.',
+        data: product.data,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
 }

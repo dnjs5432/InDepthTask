@@ -18,4 +18,21 @@ export class ProductsService {
     );
     return getproduct;
   };
+
+  getProductDetails = async (productId) => {
+    const detailsProduct = await this.productsRepositories.getProductDetails(
+      productId,
+    );
+
+    if (!detailsProduct) {
+      return {
+        success: false,
+        message: '상품 조회에 실패했습니다.',
+      };
+    }
+    return {
+      success: true,
+      data: detailsProduct,
+    };
+  };
 }
